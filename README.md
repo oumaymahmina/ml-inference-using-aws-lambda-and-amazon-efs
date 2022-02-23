@@ -42,9 +42,15 @@ Here is a quick walkthrough of the demo:
 
 https://user-images.githubusercontent.com/56056673/131384905-4fc5cfbd-9251-4cbf-ba21-287808566073.mp4
 
+# Feedback 
+Let us know what you thought of this lab and how we can improve the experience for you in the future by completing this poll. Participants who complete the surveys from AWS Innovate - AI/ML Edition will receive a gift code for USD25 in AWS credits1, 2 & 3. AWS credits will be sent via email by 31 March, 2022.
+ 
+Note: Only registrants of AWS Innovate - AI/ML Edition who complete the surveys will receive a gift code for USD25 in AWS credits via email.
+1 ![AWS Promotional Credits Terms and conditions apply](https://aws.amazon.com/awscredits/)
+2 Limited to 1 x USD25 AWS credits per participant.
+3 Participants will be required to provide their business email addresses to receive the gift code for AWS credits.
 
-
-
+And for queries about the AWS Innovate - AI/ML Edition and credit codes, please contact aws-apj-marketing@amazon.com
 
 
 
