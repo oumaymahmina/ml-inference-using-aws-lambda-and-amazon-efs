@@ -43,7 +43,7 @@ Here is a quick walkthrough of the demo:
 https://user-images.githubusercontent.com/56056673/131384905-4fc5cfbd-9251-4cbf-ba21-287808566073.mp4
 
 # Feedback 
-Let us know what you thought of this lab and how we can improve the experience for you in the future by completing this poll. Participants who complete the surveys from AWS Innovate - AI/ML Edition will receive a gift code for USD25 in AWS credits. 
+Let us know what you thought of this lab and how we can improve the experience for you in the future by completing this poll. Participants who complete the surveys from [AWS Innovate - AI/ML Edition](https://aws.amazon.com/events/aws-innovate/machine-learning/) will receive a gift code for USD25 in AWS credits. Here is the [feedback Form](https://amazonmr.au1.qualtrics.com/jfe/form/SV_3fNc9oH4ql0guCq?Session=HAN6)
 
 AWS credits will be sent via email by 31 March, 2022.
  
