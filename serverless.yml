@@ -25,7 +25,7 @@ provider:
   ecr:
     images:
       ml-image:
-        path: ./
+        path: ./ml-inference/
   timeout: 300
   memorySize: 5000
   
