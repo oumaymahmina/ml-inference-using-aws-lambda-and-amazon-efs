@@ -255,20 +255,15 @@ resources:
 #    - include-me.py
 #    - include-me-dir/**
 
-functions:
-  app1:
-    handler: s3-efs/app.lambda_handler
-    events:
-      - httpApi:
-         path: /
-         method: get
-  app2:  
-    image:
-      name: ml-image
-    events:
-      - httpApi:
-         path: /
-         method: get     
+# functions:
+#   app1:
+#     handler: s3-efs/app.lambda_handler
+   
+#   app2:  
+#     image:
+#       name: ml-image
+    
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
