@@ -38,7 +38,7 @@ resources:
   MyS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Ref SrcBucket
+      BucketName: ml-bucket-test-hm5
       
   EfsLambdaVpc:
     Type: AWS::EC2::VPC
@@ -180,7 +180,7 @@ resources:
           LocalMountPath: /mnt/ml
       Policies:
         - S3CrudPolicy: 
-            BucketName: !Ref SrcBucket
+            BucketName: ml-bucket-test-hm5
         - EFSWriteAccessPolicy:
             FileSystem: !Ref EfsFileSystem
             AccessPoint: !Ref AccessPoint
@@ -207,7 +207,7 @@ resources:
           LocalMountPath: /mnt/ml
       Policies:
         - S3CrudPolicy: 
-            BucketName: !Ref SrcBucket
+            BucketName: ml-bucket-test-hm5
         - EFSWriteAccessPolicy:
             FileSystem: !Ref EfsFileSystem
             AccessPoint: !Ref AccessPoint 
