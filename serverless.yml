@@ -1,0 +1,321 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: ml-apps
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  ecr:
+    images:
+      ml-image:
+        path: ./
+  timeout: 300
+  memorySize: 5000
+  region: eu-west-3
+# you can overwrite defaults here
+#  stage: dev
+#  region: us-east-1
+Resources:
+
+  MyS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref SrcBucket
+      
+  EfsLambdaVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Sub '10.0.0.0/16'
+
+  VPCGatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref EfsLambdaVpc
+      InternetGatewayId: !Ref InternetGateway
+      
+  SubnetAPublic:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref EfsLambdaVpc
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      CidrBlock: "10.0.0.0/24"
+      
+  SubnetAPrivate:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref EfsLambdaVpc
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: "10.0.1.0/24"
+
+  RouteTableAPublic:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref EfsLambdaVpc
+
+  RouteTableAPrivate:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref EfsLambdaVpc
+
+  RouteTableAssociationAPublic:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetAPublic
+      RouteTableId: !Ref RouteTableAPublic
+      
+  RouteTableAssociationAPrivate:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetAPrivate
+      RouteTableId: !Ref RouteTableAPrivate
+      
+  RouteTablePublicAInternetRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref RouteTableAPublic
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref InternetGateway
+
+  EIPA:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+      
+  NatGatewayA:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt 'EIPA.AllocationId'
+      SubnetId: !Ref SubnetAPublic
+
+  RouteA:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTableAPrivate
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGatewayA
+        
+  EfsLambdaSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Security group for NAT Gateway Lambda'
+      VpcId: !Ref EfsLambdaVpc
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          # FromPort: 0
+          # ToPort: 65535
+          IpProtocol: -1
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          # FromPort: 0
+          # ToPort: 65535
+          IpProtocol: -1     
+  
+  EfsFileSystem:
+    Type: AWS::EFS::FileSystem
+    
+  MountTargetA:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EfsFileSystem
+      SubnetId: !Ref SubnetAPrivate
+      SecurityGroups:
+        - !Ref EfsLambdaSecurityGroup
+
+  AccessPoint:
+    Type: AWS::EFS::AccessPoint
+    Properties:
+      FileSystemId: !Ref EfsFileSystem
+      PosixUser:
+        Gid: "1000"
+        Uid: "1000"
+      RootDirectory:
+        Path: "/ml"
+        CreationInfo:
+          OwnerGid: "1000"
+          OwnerUid: "1000"
+          Permissions: "755"
+          
+  MLModelUploadFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - MountTargetA
+    Properties:
+      CodeUri: s3-efs/
+      Handler: app.lambda_handler
+      Runtime: python3.8       
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref EfsLambdaSecurityGroup
+        SubnetIds:
+          - !Ref SubnetAPrivate
+      FileSystemConfigs:
+        - Arn: !GetAtt AccessPoint.Arn
+          LocalMountPath: /mnt/ml
+      Policies:
+        - S3CrudPolicy: 
+            BucketName: !Ref SrcBucket
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref EfsFileSystem
+            AccessPoint: !Ref AccessPoint
+      Events:
+        UploadMLModelEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref MyS3Bucket
+            Events: s3:ObjectCreated:*
+
+  InferenceFunction:
+    Type: AWS::Serverless::Function 
+    DependsOn: 
+      - MountTargetA
+    Properties:
+      PackageType: Image
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref EfsLambdaSecurityGroup
+        SubnetIds:
+          - !Ref SubnetAPrivate
+      FileSystemConfigs:
+        - Arn: !GetAtt AccessPoint.Arn
+          LocalMountPath: /mnt/ml
+      Policies:
+        - S3CrudPolicy: 
+            BucketName: !Ref SrcBucket
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref EfsFileSystem
+            AccessPoint: !Ref AccessPoint 
+      Events:
+        Inference:
+          Type: Api 
+          Properties:
+            Path: /ocr
+            Method: POST
+
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./ml-inference
+      DockerTag: python3.8-v1  
+ 
+
+ 
+# you can add statements to the Lambda function's IAM Role here
+#  iam:
+#    role:
+#      statements:
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:ListBucket"
+#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:PutObject"
+#          Resource:
+#            Fn::Join:
+#              - ""
+#              - - "arn:aws:s3:::"
+#                - "Ref" : "ServerlessDeploymentBucket"
+#                - "/*"
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+# you can add packaging information here
+#package:
+#  patterns:
+#    - '!exclude-me.py'
+#    - '!exclude-me-dir/**'
+#    - include-me.py
+#    - include-me-dir/**
+
+functions:
+  app1:
+    handler: s3-efs/app.lambda_handler
+    events:
+      - httpApi:
+         path: /
+         method: get
+  app2:  
+    image:
+      name: ml-image
+    events:
+      - httpApi:
+         path: /
+         method: get     
+#    The following are a few example events you can configure
+#    NOTE: Please make sure to change your handler code to work with those events
+#    Check the event documentation for details
+#    events:
+#      - httpApi:
+#          path: /users/create
+#          method: get
+#      - websocket: $connect
+#      - s3: ${env:BUCKET}
+#      - schedule: rate(10 minutes)
+#      - sns: greeter-topic
+#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
+#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
+#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
+#      - iot:
+#          sql: "SELECT * FROM 'some_topic'"
+#      - cloudwatchEvent:
+#          event:
+#            source:
+#              - "aws.ec2"
+#            detail-type:
+#              - "EC2 Instance State-change Notification"
+#            detail:
+#              state:
+#                - pending
+#      - cloudwatchLog: '/aws/lambda/hello'
+#      - cognitoUserPool:
+#          pool: MyUserPool
+#          trigger: PreSignUp
+#      - alb:
+#          listenerArn: arn:aws:elasticloadbalancing:us-east-1:XXXXXX:listener/app/my-load-balancer/50dc6c495c0c9188/
+#          priority: 1
+#          conditions:
+#            host: example.com
+#            path: /hello
+
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
+
+# you can add CloudFormation resource templates here
+#resources:
+#  Resources:
+#    NewResource:
+#      Type: AWS::S3::Bucket
+#      Properties:
+#        BucketName: my-new-bucket
+#  Outputs:
+#     NewOutput:
+#       Description: "Description for the output"
+#       Value: "Some output value"
