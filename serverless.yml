@@ -28,6 +28,7 @@ provider:
         path: ./ml-inference/
   timeout: 300
   memorySize: 5000
+  region: eu-west-3
   
 # you can overwrite defaults here
 #  stage: dev
