@@ -256,13 +256,13 @@ resources:
 #    - include-me.py
 #    - include-me-dir/**
 
-# functions:
-#   app1:
-#     handler: s3-efs/app.lambda_handler
+functions:
+  app1:
+    handler: s3-efs/app.lambda_handler
    
-#   app2:  
-#     image:
-#       name: ml-image
+  app2:  
+    image:
+      name: ml-image
     
 
 #    The following are a few example events you can configure
