@@ -1,5 +1,3 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
 # Welcome to Serverless!
 #
 # This file is the main config file for your service.
@@ -35,7 +33,8 @@ provider:
 #  stage: dev
 #  region: us-east-1
 resources:
-
+ AWSTemplateFormatVersion: '2010-09-09'
+ Transform: AWS::Serverless-2016-10-31
  Resources:
   MyS3Bucket:
     Type: 'AWS::S3::Bucket'
