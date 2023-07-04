@@ -164,106 +164,106 @@ resources:
           OwnerUid: "1000"
           Permissions: "755"
           
-  MLModelUploadFunction:
-    Type: AWS::Serverless::Function
-    DependsOn:
-      - MountTargetA
-    Properties:
-      CodeUri: s3-efs/
-      Handler: app.lambda_handler
-      Runtime: python3.8       
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref EfsLambdaSecurityGroup
-        SubnetIds:
-          - !Ref SubnetAPrivate
-      FileSystemConfigs:
-        - Arn: !GetAtt AccessPoint.Arn
-          LocalMountPath: /mnt/ml
-      Policies:
-        - S3CrudPolicy: 
-            BucketName: ml-bucket-test-hm5
-        - EFSWriteAccessPolicy:
-            FileSystem: !Ref EfsFileSystem
-            AccessPoint: !Ref AccessPoint
-      Events:
-        UploadMLModelEvent:
-          Type: S3
-          Properties:
-            Bucket: !Ref MyS3Bucket
-            Events: s3:ObjectCreated:*
+#   MLModelUploadFunction:
+#     Type: AWS::Serverless::Function
+#     DependsOn:
+#       - MountTargetA
+#     Properties:
+#       CodeUri: s3-efs/
+#       Handler: app.lambda_handler
+#       Runtime: python3.8       
+#       VpcConfig:
+#         SecurityGroupIds:
+#           - !Ref EfsLambdaSecurityGroup
+#         SubnetIds:
+#           - !Ref SubnetAPrivate
+#       FileSystemConfigs:
+#         - Arn: !GetAtt AccessPoint.Arn
+#           LocalMountPath: /mnt/ml
+#       Policies:
+#         - S3CrudPolicy: 
+#             BucketName: ml-bucket-test-hm5
+#         - EFSWriteAccessPolicy:
+#             FileSystem: !Ref EfsFileSystem
+#             AccessPoint: !Ref AccessPoint
+#       Events:
+#         UploadMLModelEvent:
+#           Type: S3
+#           Properties:
+#             Bucket: !Ref MyS3Bucket
+#             Events: s3:ObjectCreated:*
 
-  InferenceFunction:
-    Type: AWS::Serverless::Function 
-    DependsOn: 
-      - MountTargetA
-    Properties:
-      PackageType: Image
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref EfsLambdaSecurityGroup
-        SubnetIds:
-          - !Ref SubnetAPrivate
-      FileSystemConfigs:
-        - Arn: !GetAtt AccessPoint.Arn
-          LocalMountPath: /mnt/ml
-      Policies:
-        - S3CrudPolicy: 
-            BucketName: ml-bucket-test-hm5
-        - EFSWriteAccessPolicy:
-            FileSystem: !Ref EfsFileSystem
-            AccessPoint: !Ref AccessPoint 
-      Events:
-        Inference:
-          Type: Api 
-          Properties:
-            Path: /ocr
-            Method: POST
+#   InferenceFunction:
+#     Type: AWS::Serverless::Function 
+#     DependsOn: 
+#       - MountTargetA
+#     Properties:
+#       PackageType: Image
+#       VpcConfig:
+#         SecurityGroupIds:
+#           - !Ref EfsLambdaSecurityGroup
+#         SubnetIds:
+#           - !Ref SubnetAPrivate
+#       FileSystemConfigs:
+#         - Arn: !GetAtt AccessPoint.Arn
+#           LocalMountPath: /mnt/ml
+#       Policies:
+#         - S3CrudPolicy: 
+#             BucketName: ml-bucket-test-hm5
+#         - EFSWriteAccessPolicy:
+#             FileSystem: !Ref EfsFileSystem
+#             AccessPoint: !Ref AccessPoint 
+#       Events:
+#         Inference:
+#           Type: Api 
+#           Properties:
+#             Path: /ocr
+#             Method: POST
 
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./ml-inference
-      DockerTag: python3.8-v1  
+#     Metadata:
+#       Dockerfile: Dockerfile
+#       DockerContext: ./ml-inference
+#       DockerTag: python3.8-v1  
  
 
  
-# you can add statements to the Lambda function's IAM Role here
-#  iam:
-#    role:
-#      statements:
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:ListBucket"
-#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:PutObject"
-#          Resource:
-#            Fn::Join:
-#              - ""
-#              - - "arn:aws:s3:::"
-#                - "Ref" : "ServerlessDeploymentBucket"
-#                - "/*"
+# # you can add statements to the Lambda function's IAM Role here
+# #  iam:
+# #    role:
+# #      statements:
+# #        - Effect: "Allow"
+# #          Action:
+# #            - "s3:ListBucket"
+# #          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+# #        - Effect: "Allow"
+# #          Action:
+# #            - "s3:PutObject"
+# #          Resource:
+# #            Fn::Join:
+# #              - ""
+# #              - - "arn:aws:s3:::"
+# #                - "Ref" : "ServerlessDeploymentBucket"
+# #                - "/*"
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+# # you can define service wide environment variables here
+# #  environment:
+# #    variable1: value1
 
-# you can add packaging information here
-#package:
-#  patterns:
-#    - '!exclude-me.py'
-#    - '!exclude-me-dir/**'
-#    - include-me.py
-#    - include-me-dir/**
+# # you can add packaging information here
+# #package:
+# #  patterns:
+# #    - '!exclude-me.py'
+# #    - '!exclude-me-dir/**'
+# #    - include-me.py
+# #    - include-me-dir/**
 
-functions:
-  app1:
-    handler: s3-efs/app.lambda_handler
+# functions:
+#   app1:
+#     handler: s3-efs/app.lambda_handler
    
-  app2:  
-    image:
-      name: ml-image
+#   app2:  
+#     image:
+#       name: ml-image
     
 
 #    The following are a few example events you can configure
