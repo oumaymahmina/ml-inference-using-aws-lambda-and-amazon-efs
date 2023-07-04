@@ -32,8 +32,9 @@ provider:
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
-Resources:
+resources:
 
+ Resources:
   MyS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
