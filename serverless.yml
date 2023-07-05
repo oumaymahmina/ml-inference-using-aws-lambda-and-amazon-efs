@@ -51,4 +51,5 @@ functions:
       name: ml-image 
       events:  
        - httpApi:
+          path: /
           method: get
