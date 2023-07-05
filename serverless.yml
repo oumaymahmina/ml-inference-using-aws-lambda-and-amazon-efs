@@ -45,7 +45,7 @@ resources:
          
 functions:
   app1:
-    handler: s3-efs/app2.lambda_handler
+    handler: app2.lambda_handler
   app2:  
     image:
       name: ml-image 
