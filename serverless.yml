@@ -46,6 +46,7 @@ resources:
 functions:
   apps3:
     handler: s3-efs/apps3.lambda_handler
+    runtime: python3.8   
     events:
       - S3:
            bucket: ml-bucket-test-hm5
@@ -55,7 +56,8 @@ functions:
   app2:  
     image:
       name: ml-image 
-      events:  
+    runtime: python3.8  
+    events:  
        - httpApi:
           path: /
           method: get
