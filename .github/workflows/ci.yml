@@ -27,4 +27,11 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
         with:
           region: eu-west-3
+      - name: Create ECR repository if it does not exists
+        uses: TrouveTaVoie-GitOps/create-ecr-repository-action@v1 
+        id: ecr 
+        with:
+             repository: ${{ github.event.repository.name }}
+             public: false
+         
     
