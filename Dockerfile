@@ -11,7 +11,7 @@ RUN python3.8 -m pip install -r requirements.txt
 RUN mkdir -p /mnt/ml
 
 # Copy the earlier created app.py file to the container
-COPY app.py ./
+COPY appml.py ./
 
 # Set the CMD to your handler
-CMD ["app.lambda_handler"]
+CMD ["appml.lambda_handler"]
