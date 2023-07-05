@@ -12,7 +12,7 @@ provider:
   ecr:
     images:
       ml-image:
-        path: ./
+        path: ./ml-inference/
   timeout: 300
   memorySize: 1000
   region: eu-west-3
@@ -44,6 +44,14 @@ resources:
           Permissions: "755"  
       
 functions:
+  apps3:
+    handler: s3-efs/apps3.lambda_handler
+    events:
+      - S3:
+           bucket: ml-bucket-test-hm5
+           event: s3:ObjectCreated:*
+
+
   app2:  
     image:
       name: ml-image 
