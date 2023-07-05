@@ -29,6 +29,19 @@ resources:
       BucketName: ml-bucket-test-hm5
   EfsFileSystem:
     Type: AWS::EFS::FileSystem
+  AccessPoint:
+    Type: AWS::EFS::AccessPoint
+    Properties:
+      FileSystemId: !Ref EfsFileSystem
+      PosixUser:
+        Gid: "1000"
+        Uid: "1000"
+      RootDirectory:
+        Path: "/ml"
+        CreationInfo:
+          OwnerGid: "1000"
+          OwnerUid: "1000"
+          Permissions: "755"  
          
 functions:
   app1:
@@ -38,4 +51,4 @@ functions:
       name: ml-image 
       events:  
        - httpApi:
-          method: POST
+          method: get
