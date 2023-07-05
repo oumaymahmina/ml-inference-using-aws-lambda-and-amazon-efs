@@ -44,14 +44,6 @@ resources:
           Permissions: "755"  
       
 functions:
-  app1:
-    handler: apps3.lambda_handler
-    events:
-      - S3:
-           bucket: ml-bucket-test-hm5
-           event: s3:ObjectCreated:*
-
-
   app2:  
     image:
       name: ml-image 
