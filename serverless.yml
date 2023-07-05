@@ -45,7 +45,13 @@ resources:
          
 functions:
   app1:
-    handler: app2.lambda_handler
+    handler: s3-efs.app.lambda_handler
+    events:
+      - S3:
+           bucket: ml-bucket-test-hm5
+           event: s3:ObjectCreated:*
+
+
   app2:  
     image:
       name: ml-image 
