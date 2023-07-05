@@ -23,6 +23,13 @@ resources:
  AWSTemplateFormatVersion: '2010-09-09'
  Transform: AWS::Serverless-2016-10-31
  Resources:
+  MountTargetA:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EfsFileSystem
+      SubnetId: !Ref SubnetAPrivate
+      SecurityGroups:
+        - !Ref EfsLambdaSecurityGroup
   MyS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
@@ -42,20 +49,79 @@ resources:
           OwnerGid: "1000"
           OwnerUid: "1000"
           Permissions: "755"  
-         
-functions:
-  app1:
-    handler: s3-efs/app.lambda_handler
-    events:
-      - S3:
-           bucket: ml-bucket-test-hm5
-           event: s3:ObjectCreated:*
+  MLModelUploadFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - MountTargetA
+    Properties:
+      CodeUri: s3-efs/
+      Handler: app.lambda_handler
+      Runtime: python3.8       
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref EfsLambdaSecurityGroup
+        SubnetIds:
+          - !Ref SubnetAPrivate
+      FileSystemConfigs:
+        - Arn: !GetAtt AccessPoint.Arn
+          LocalMountPath: /mnt/ml
+      Policies:
+        - S3CrudPolicy: 
+            BucketName: !Ref SrcBucket
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref EfsFileSystem
+            AccessPoint: !Ref AccessPoint
+      Events:
+        UploadMLModelEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref MyS3Bucket
+            Events: s3:ObjectCreated:*
+
+  InferenceFunction:
+    Type: AWS::Serverless::Function 
+    DependsOn: 
+      - MountTargetA
+    Properties:
+      PackageType: Image
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref EfsLambdaSecurityGroup
+        SubnetIds:
+          - !Ref SubnetAPrivate
+      FileSystemConfigs:
+        - Arn: !GetAtt AccessPoint.Arn
+          LocalMountPath: /mnt/ml
+      Policies:
+        - S3CrudPolicy: 
+            BucketName: !Ref SrcBucket
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref EfsFileSystem
+            AccessPoint: !Ref AccessPoint 
+      Events:
+        Inference:
+          Type: Api 
+          Properties:
+            Path: /ocr
+            Method: POST
+
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./ml-inference
+      DockerTag: python3.8-v1       
+# functions:
+#   app1:
+#     handler: s3-efs/app.lambda_handler
+#     events:
+#       - S3:
+#            bucket: ml-bucket-test-hm5
+#            event: s3:ObjectCreated:*
 
 
-  app2:  
-    image:
-      name: ml-image 
-      events:  
-       - httpApi:
-          path: /
-          method: get
+#   app2:  
+#     image:
+#       name: ml-image 
+#       events:  
+#        - httpApi:
+#           path: /
+#           method: get
