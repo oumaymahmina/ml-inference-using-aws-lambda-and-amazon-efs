@@ -32,4 +32,10 @@ resources:
          
 functions:
   app1:
-    handler: s3-efs/app.lambda_handler      
+    handler: s3-efs/app.lambda_handler
+  app2:  
+    image:
+      name: ml-image 
+      events:  
+       - httpApi:
+          method: POST
