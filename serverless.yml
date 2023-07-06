@@ -9,6 +9,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
+  runtime: python3.8
   ecr:
     images:
       ml-image:
@@ -53,7 +54,7 @@ functions:
            event: s3:ObjectCreated:*
 
 
-  app2:  
+  appml:  
     image:
       name: ml-image 
     runtime: python3.8  
