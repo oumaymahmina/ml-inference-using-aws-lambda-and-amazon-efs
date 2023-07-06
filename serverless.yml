@@ -14,7 +14,7 @@ provider:
     images:
       ml-image:
         path: ./ml-inference/
-  timeout: 500
+  timeout: 600
   memorySize: 1000
   region: eu-west-3
   
