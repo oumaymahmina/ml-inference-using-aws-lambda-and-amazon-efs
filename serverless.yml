@@ -21,7 +21,6 @@ provider:
   
 # you can overwrite defaults here
 #  stage: dev
- #functions.apps3.events.0.S3.bucket
       
 functions:
   apps3:
