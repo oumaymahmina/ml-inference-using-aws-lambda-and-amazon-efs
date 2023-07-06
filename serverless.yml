@@ -17,6 +17,32 @@ provider:
   timeout: 600
   memorySize: 1000
   region: eu-west-3
+resources:
+ AWSTemplateFormatVersion: '2010-09-09'
+ Transform: AWS::Serverless-2016-10-31
+ Resources: 
+  EfsFileSystem:
+    Type: AWS::EFS::FileSystem
+  MountTargetA:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EfsFileSystem
+      SubnetId: subnet-01e34f35d338d55f2
+      SecurityGroups:
+        - !Ref EfsLambdaSecurityGroup  
+  AccessPoint:
+    Type: AWS::EFS::AccessPoint
+    Properties:
+      FileSystemId: !Ref EfsFileSystem
+      PosixUser:
+        Gid: "1000"
+        Uid: "1000"
+      RootDirectory:
+        Path: "/ml"
+        CreationInfo:
+          OwnerGid: "1000"
+          OwnerUid: "1000"
+          Permissions: "755"  
   
   
 # you can overwrite defaults here
@@ -24,6 +50,9 @@ provider:
       
 functions:
   apps3:
+    environment:
+        MODEL_DIR: /mnt/ml/models/
+          
     handler: s3-efs/apps3.lambda_handler
     runtime: python3.8   
     events:
