@@ -57,6 +57,7 @@ functions:
                - prefix: uploads/
                - suffix: .jpg
            existing: true
+           forceDeploy: true
 
 
   appml:  
