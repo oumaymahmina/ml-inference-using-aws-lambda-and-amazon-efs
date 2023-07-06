@@ -60,7 +60,7 @@ functions:
            forceDeploy: true
 
 
-  appml:  
+  appml1:  
     image:
       name: ml-image 
     runtime: python3.8  
