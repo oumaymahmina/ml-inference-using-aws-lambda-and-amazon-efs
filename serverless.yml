@@ -52,17 +52,16 @@ functions:
       - S3:
            bucket: ml-bucket-test-hm5
            event: s3:ObjectCreated:*
+           
            rules: 
                - prefix: uploads/
                - suffix: .jpg
            existing: true
- 
 
 
   appml:  
-    images:
-      name: ml-image
-    
+    image:
+      name: ml-image 
     runtime: python3.8  
     events:  
        - httpApi:
