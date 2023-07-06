@@ -55,8 +55,8 @@ functions:
 
 
   appml:  
-    image:
-      name: ml-image 
+    
+    handler: ml-inference/appml.lambda_handler  
     runtime: python3.8  
     events:  
        - httpApi:
