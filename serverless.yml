@@ -66,5 +66,5 @@ functions:
     runtime: python3.8  
     events:  
        - httpApi:
-          path: ./ml-inference/
+          path: /
           method: get
