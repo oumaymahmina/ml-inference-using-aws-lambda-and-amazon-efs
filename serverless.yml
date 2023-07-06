@@ -17,32 +17,12 @@ provider:
   timeout: 600
   memorySize: 1000
   region: eu-west-3
+custom:
+  bucket_name : ${file(./s3-esf/apps3.py):bucket_name }  
   
 # you can overwrite defaults here
 #  stage: dev
-resources:
- AWSTemplateFormatVersion: '2010-09-09'
- Transform: AWS::Serverless-2016-10-31
- Resources:
-  MyS3Bucket:
-    Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName: !Ref SrcBucket
-  EfsFileSystem:
-    Type: AWS::EFS::FileSystem
-  AccessPoint:
-    Type: AWS::EFS::AccessPoint
-    Properties:
-      FileSystemId: !Ref EfsFileSystem
-      PosixUser:
-        Gid: "1000"
-        Uid: "1000"
-      RootDirectory:
-        Path: "/ml"
-        CreationInfo:
-          OwnerGid: "1000"
-          OwnerUid: "1000"
-          Permissions: "755"  
+ 
       
 functions:
   apps3:
@@ -50,14 +30,10 @@ functions:
     runtime: python3.8   
     events:
       - S3:
-           bucket: !Ref SrcBucket
-           event: s3:ObjectCreated:*
+           bucket: ${self:custom.bucket_name}
            
-           rules: 
-               - prefix: uploads/
-               - suffix: .jpg
-           existing: true
-           forceDeploy: true
+           
+        
 
 
   appml1:  
