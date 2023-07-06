@@ -24,10 +24,10 @@ resources:
  AWSTemplateFormatVersion: '2010-09-09'
  Transform: AWS::Serverless-2016-10-31
  Resources:
-  # MyS3Bucket:
-  #   Type: 'AWS::S3::Bucket'
-  #   Properties:
-  #     BucketName: ml-bucket-test-hm5
+  MyS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: ml-bucket-test-hm5
   EfsFileSystem:
     Type: AWS::EFS::FileSystem
   AccessPoint:
@@ -56,8 +56,8 @@ functions:
            rules: 
                - prefix: uploads/
                - suffix: .jpg
-          #  existing: true
-          #  forceDeploy: true
+           existing: true
+           forceDeploy: true
 
 
   appml:  
