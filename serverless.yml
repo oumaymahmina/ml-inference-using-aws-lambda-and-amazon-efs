@@ -6,7 +6,8 @@ service: ml-apps
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 frameworkVersion: '3'
-
+custom:
+  myVariable: ${file(./s3-efs/apps3.py):bucket_name}
 provider:
   name: aws
   runtime: python3.8
@@ -29,7 +30,7 @@ functions:
     runtime: python3.8   
     events:
       - S3:
-           bucket: ml-bucket-s3
+           bucket:  ${self:custom.bucket_name}
            
            
         
