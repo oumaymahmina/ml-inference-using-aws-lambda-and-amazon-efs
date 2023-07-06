@@ -13,7 +13,7 @@ provider:
   ecr:
     images:
       ml-image:
-        path: ./ml-inference/
+        path: ./
   timeout: 600
   memorySize: 1000
   region: eu-west-3
