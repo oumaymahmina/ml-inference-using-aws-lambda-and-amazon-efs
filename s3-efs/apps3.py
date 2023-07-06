@@ -14,5 +14,5 @@ def lambda_handler(event, context):
     
     s3.download_file(bucket_name, key, f'{model_dir}/{key}')
     
-    print("ML Model file downloaded!")
+    print("ML Model file downloaded;!")
     
