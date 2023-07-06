@@ -27,7 +27,7 @@ resources:
   MyS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: ml-bucket-test-hm5
+      BucketName: !Ref SrcBucket
   EfsFileSystem:
     Type: AWS::EFS::FileSystem
   AccessPoint:
@@ -50,7 +50,7 @@ functions:
     runtime: python3.8   
     events:
       - S3:
-           bucket: ml-bucket-test-hm5
+           bucket: !Ref SrcBucket
            event: s3:ObjectCreated:*
            
            rules: 
