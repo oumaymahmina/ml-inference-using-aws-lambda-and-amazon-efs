@@ -7,7 +7,7 @@ service: ml-apps
 # Check out our docs for more details
 frameworkVersion: '3'
 custom:
-  myVariable: ${file(./s3-efs/apps3.py):bucket_name}
+  bucket_name: ${file(./s3-efs/apps3.py):bucket_name}
 provider:
   name: aws
   runtime: python3.8
@@ -22,19 +22,16 @@ provider:
   
 # you can overwrite defaults here
 #  stage: dev
- 
+ #functions.apps3.events.0.S3.bucket
       
 functions:
   apps3:
     handler: s3-efs/apps3.lambda_handler
     runtime: python3.8   
     events:
-      - S3:
-           bucket:  ${self:custom.bucket_name}
-           
-           
-        
-
+      - s3:
+          bucket: ${self:custom.bucket_name}
+          event: s3:ObjectCreated:*
 
   appml1:  
     image:
