@@ -10,11 +10,7 @@ plugins:
   - serverless-vpc-plugin
   
 provider:
-  vpc:
-    securityGroupIds:
-      -  # plugin will add LambdaExecutionSecurityGroup to this list
-    subnetIds:
-      -  # plugin will add the "Application" subnets to this list
+  
   name: aws
   runtime: python3.8
   ecr:
@@ -24,69 +20,33 @@ provider:
   timeout: 600
   memorySize: 1000
   region: eu-west-3
-custom:
-  vpcConfig:
-    # Whether plugin is enabled. Can be used to selectively disable plugin
-    # on certain stages or configurations. Defaults to true.
-    enabled: true
- 
-    cidrBlock: '10.0.0.0/16'
- 
-    # if createNatGateway is a boolean "true", a NAT Gateway and EIP will be provisioned in each zone
-    # if createNatGateway is a number, that number of NAT Gateways will be provisioned
-    createNatGateway: false
- 
-    # When enabled, the DB subnet will only be accessible from the Application subnet
-    # Both the Public and Application subnets will be accessible from 0.0.0.0/0
-    createNetworkAcl: false
- 
-    # Whether to create the DB subnet
-    createDbSubnet: false
- 
-    # Whether to enable VPC flow logging to an S3 bucket
-    createFlowLogs: false
- 
-    # Whether to create a bastion host
-    createBastionHost: false
-    # bastionHostKeyName: MyKey # required if creating a bastion host
- 
-    # Whether to create a NAT instance
-    createNatInstance: false
- 
-    # Whether to create AWS Systems Manager (SSM) Parameters
-    createParameters: false
- 
-    # Optionally specify AZs (defaults to auto-discover all availabile AZs)
-    zones:
-      - eu-west-3a
-      - eu-west-3b
-      - eu-west-3c  
-resources:
- AWSTemplateFormatVersion: '2010-09-09'
- Transform: AWS::Serverless-2016-10-31
- Resources: 
-  # EfsFileSystem:
-  #   Type: AWS::EFS::FileSystem
-  # MountTargetA:
-  #   Type: AWS::EFS::MountTarget
-  #   Properties:
-  #     FileSystemId: !Ref EfsFileSystem
-  #     SubnetId: ${self:custom.}
-  #     SecurityGroups:
-  #       - !Ref EfsLambdaSecurityGroup  
-  # AccessPoint:
-  #   Type: AWS::EFS::AccessPoint
-  #   Properties:
-  #     FileSystemId: !Ref EfsFileSystem
-  #     PosixUser:
-  #       Gid: "1000"
-  #       Uid: "1000"
-  #     RootDirectory:
-  #       Path: "/ml"
-  #       CreationInfo:
-  #         OwnerGid: "1000"
-  #         OwnerUid: "1000"
-  #         Permissions: "755"  
+
+# resources:
+#  AWSTemplateFormatVersion: '2010-09-09'
+#  Transform: AWS::Serverless-2016-10-31
+#  Resources: 
+#   EfsFileSystem:
+#     Type: AWS::EFS::FileSystem
+#   MountTargetA:
+#     Type: AWS::EFS::MountTarget
+#     Properties:
+#       FileSystemId: !Ref EfsFileSystem
+#       SubnetId: ${self:custom.}
+#       SecurityGroups:
+#         - !Ref EfsLambdaSecurityGroup  
+#   AccessPoint:
+#     Type: AWS::EFS::AccessPoint
+#     Properties:
+#       FileSystemId: !Ref EfsFileSystem
+#       PosixUser:
+#         Gid: "1000"
+#         Uid: "1000"
+#       RootDirectory:
+#         Path: "/ml"
+#         CreationInfo:
+#           OwnerGid: "1000"
+#           OwnerUid: "1000"
+#           Permissions: "755"  
   
   
 # you can overwrite defaults here
@@ -98,6 +58,12 @@ functions:
         MODEL_DIR: /mnt/ml/models/
           
     handler: s3-efs/apps3.lambda_handler
+    vpc:
+      securityGroupIds:
+        - 
+      subnetIds:
+        - 
+        -    
     runtime: python3.8   
     events:
       - s3:
