@@ -59,11 +59,10 @@ functions:
           
     handler: s3-efs/apps3.lambda_handler
     vpc:
-      securityGroupIds:
-        - 
-      subnetIds:
-        - 
-        -    
+    securityGroupIds:
+      -  # plugin will add LambdaExecutionSecurityGroup to this list
+    subnetIds:
+      -  # plugin will add the "Application" subnets to this list
     runtime: python3.8   
     events:
       - s3:
