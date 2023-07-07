@@ -6,7 +6,7 @@ COPY requirements.txt ./
 
 # Install the python requirements from requirements.txt
 RUN python3.8 -m pip install -r requirements.txt 
-RUN 
+
 # Create the model directory for mounting the EFS 
 RUN mkdir -p /mnt/ml
 
