@@ -10,7 +10,11 @@ plugins:
   - serverless-vpc-plugin
   
 provider:
-  
+  vpc:
+    securityGroupIds:
+      -  # plugin will add LambdaExecutionSecurityGroup to this list
+    subnetIds:
+      -  # plugin will add the "Application" subnets to this list
   name: aws
   runtime: python3.8
   ecr:
@@ -19,12 +23,46 @@ provider:
         path: ./ml-inference/
   timeout: 600
   memorySize: 1000
-  region: eu-west-3
-  vpc:
-    securityGroupIds:
-      -  Fn::GetAtt: [MySecurityGroup, Ref]
-    subnetIds:
-      -   Fn::GetAtt: [MySubnet, Ref]  
+  region: eu-west-3	
+custom:
+  vpcConfig:
+    # Whether plugin is enabled. Can be used to selectively disable plugin
+    # on certain stages or configurations. Defaults to true.
+    enabled: true
+ 
+    cidrBlock: '10.0.0.0/16'
+ 
+    # if createNatGateway is a boolean "true", a NAT Gateway and EIP will be provisioned in each zone
+    # if createNatGateway is a number, that number of NAT Gateways will be provisioned
+    createNatGateway: 2
+ 
+    # When enabled, the DB subnet will only be accessible from the Application subnet
+    # Both the Public and Application subnets will be accessible from 0.0.0.0/0
+    createNetworkAcl: false
+ 
+    # Whether to create the DB subnet
+    createDbSubnet: true 
+    # Whether to enable VPC flow logging to an S3 bucket
+    createFlowLogs: false
+ 
+    # Whether to create a bastion host
+    createBastionHost: false
+    bastionHostKeyName: MyKey # required if creating a bastion host
+ 
+    # Whether to create a NAT instance
+    createNatInstance: false
+ 
+    # Whether to create AWS Systems Manager (SSM) Parameters
+    createParameters: false
+ 
+    # Optionally specify AZs (defaults to auto-discover all availabile AZs)
+    zones:
+      - eu-west-3a
+      - eu-west-3b
+      - eu-west-3c    
+    # Whether to export stack outputs so it may be consumed by other stacks
+    exportOutputs: true      
+  
 
 
 # resources:
@@ -80,33 +118,3 @@ functions:
           path: /
           method: get
 
-resources:
-  Resources:
-    MySubnet:
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId: ${self:custom.vpcId}
-        CidrBlock: 10.0.1.0/24
-        AvailabilityZone: eu-west-3c
-    MySecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: My Lambda Security Group
-        VpcId:  ${self:custom.vpcId}
-        SecurityGroupIngress:
-          - IpProtocol: tcp
-            FromPort: 80
-            ToPort: 80
-            CidrIp: 0.0.0.0/0
-        Tags:
-          - Key: Name
-            Value: MySecurityGroup 
-  Outputs:
-    CustomVpcId:
-      Value: ${self:custom.vpcId}
-      Export:
-        Name: CustomVpcId 
-    CustomSecurityGroupId:
-      Value: !Ref MySecurityGroup
-      Export:
-        Name: CustomSecurityGroupId                          
