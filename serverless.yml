@@ -6,8 +6,8 @@ service: ml-apps
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 frameworkVersion: '3'
-# plugins:
-#   - serverless-vpc-plugin
+plugins:
+  - serverless-vpc-plugin
   
 provider:
   
@@ -20,6 +20,12 @@ provider:
   timeout: 600
   memorySize: 1000
   region: eu-west-3
+  vpc:
+    securityGroupIds:
+      -   ${self:custom.lambdaExecutionSecurityGroupId}
+    subnetIds:
+      -   Fn::GetAtt: [MySubnet, Ref]  
+
 
 # resources:
 #  AWSTemplateFormatVersion: '2010-09-09'
@@ -73,3 +79,12 @@ functions:
        - httpApi:
           path: /
           method: get
+
+resources:
+  Resources:
+    MySubnet:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: ${self:custom.vpcId}
+        CidrBlock: 10.0.1.0/24
+        AvailabilityZone: eu-west-3c
