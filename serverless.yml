@@ -118,3 +118,9 @@ functions:
           path: /
           method: get
 
+resources:
+  Resources:
+    MyVpc:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        TemplateFile: vpc.yml
