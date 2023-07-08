@@ -22,7 +22,7 @@ provider:
   region: eu-west-3
   vpc:
     securityGroupIds:
-      -   ${self:custom.lambdaExecutionSecurityGroupId}
+      -  Fn::GetAtt: [MySecurityGroup, Ref]
     subnetIds:
       -   Fn::GetAtt: [MySubnet, Ref]  
 
@@ -88,3 +88,16 @@ resources:
         VpcId: ${self:custom.vpcId}
         CidrBlock: 10.0.1.0/24
         AvailabilityZone: eu-west-3c
+    MySecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: My Lambda Security Group
+        VpcId:  ${self:custom.vpcId}
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 0.0.0.0/0
+        Tags:
+          - Key: Name
+            Value: MySecurityGroup        
