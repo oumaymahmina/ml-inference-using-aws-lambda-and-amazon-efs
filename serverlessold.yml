@@ -1,0 +1,115 @@
+service: ml-apps
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+
+
+  
+provider:
+  name: aws
+  runtime: python3.8
+  ecr:
+    images:
+      ml-image:
+        path: ./ml-inference/
+  timeout: 600
+  memorySize: 1000
+  region: eu-west-3	
+
+resources:
+  Resources:
+    EfsLambdaVpc:
+      Type: 'AWS::EC2::VPC'
+      Properties:
+        CidrBlock: '10.0.0.0/16'
+
+    SubnetAPrivate:
+      Type: 'AWS::EC2::Subnet'
+      Properties:
+        VpcId: !Ref EfsLambdaVpc
+        AvailabilityZone: !Select [1, !GetAZs '']
+        CidrBlock: '10.0.1.0/24'
+    EfsLambdaSecurityGroup:
+      Type: 'AWS::EC2::SecurityGroup'
+      Properties:
+        GroupDescription: 'Security group for NAT Gateway Lambda'
+        VpcId: !Ref EfsLambdaVpc
+        SecurityGroupEgress:
+          - CidrIp: "0.0.0.0/0"
+            # FromPort: 0
+            # ToPort: 65535
+            IpProtocol: -1
+        SecurityGroupIngress:
+          - CidrIp: "0.0.0.0/0"
+            # FromPort: 0
+            # ToPort: 65535
+            IpProtocol: -1
+    EfsFileSystem:
+      Type: 'AWS::EFS::FileSystem'
+
+    MountTargetA:
+      Type: 'AWS::EFS::MountTarget'
+      Properties:
+        FileSystemId: !Ref EfsFileSystem
+        SubnetId: !Ref SubnetAPrivate
+        SecurityGroups:
+          - !Ref EfsLambdaSecurityGroup
+
+    AccessPoint:
+      Type: 'AWS::EFS::AccessPoint'
+      Properties:
+        FileSystemId: !Ref EfsFileSystem
+        PosixUser:
+          Gid: '1000'
+          Uid: '1000'
+        RootDirectory:
+          Path: '/ml'
+          CreationInfo:
+            OwnerGid: '1000'
+            OwnerUid: '1000'
+            Permissions: '755'  
+  
+  
+# you can overwrite defaults here
+#  stage: dev
+      
+functions:
+  apps3:
+    environment:
+      MODEL_DIR: /mnt/ml/models/
+    handler: s3-efs/apps3.lambda_handler
+    runtime: python3.8   
+    timeout: 300
+    memorySize: 5000
+    vpc:
+      securityGroupIds:
+        - EfsLambdaSecurityGroup
+      subnetIds:
+        - SubnetAPrivate
+    fileSystemConfig:
+      localMountPath: /mnt/ml
+      arn: { "Fn::GetAtt": [ AccessPoint, Arn ] }
+    Policies:
+      - S3CrudPolicy: 
+          BucketName: bucket-example-mls3
+      - EFSWriteAccessPolicy:
+          FileSystem: EfsFileSystem
+          AccessPoint: AccessPoint
+    events:
+      - s3:
+          bucket: bucket-example-mls3
+          event: s3:ObjectCreated:*
+
+  appml1:  
+    image:
+      name: ml-image 
+    runtime: python3.8  
+    events:  
+       - httpApi:
+          path: /
+          method: get
