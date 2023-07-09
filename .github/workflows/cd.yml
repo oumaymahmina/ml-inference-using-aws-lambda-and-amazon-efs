@@ -24,8 +24,8 @@ jobs:
           - name: Install serverless
             run: npm install -g serverless
 
-          - name: Install plugin
-            run: npm install serverless-pseudo-parameters
+          # - name: Install plugin
+          #   run: npm install serverless-pseudo-parameters
  
 
 
