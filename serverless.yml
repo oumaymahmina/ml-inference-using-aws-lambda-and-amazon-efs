@@ -21,35 +21,44 @@ provider:
   memorySize: 1000
   region: eu-west-3	
 
-  
+resources:
+  Resources:
+    EfsLambdaVpc:
+      Type: 'AWS::EC2::VPC'
+      Properties:
+        CidrBlock: '10.0.0.0/16'
 
+    SubnetAPrivate:
+      Type: 'AWS::EC2::Subnet'
+      Properties:
+        VpcId: !Ref EfsLambdaVpc
+        AvailabilityZone: !Select [1, !GetAZs '']
+        CidrBlock: '10.0.1.0/24'
 
-# resources:
-#  AWSTemplateFormatVersion: '2010-09-09'
-#  Transform: AWS::Serverless-2016-10-31
-#  Resources: 
-#   EfsFileSystem:
-#     Type: AWS::EFS::FileSystem
-#   MountTargetA:
-#     Type: AWS::EFS::MountTarget
-#     Properties:
-#       FileSystemId: !Ref EfsFileSystem
-#       SubnetId: ${self:custom.}
-#       SecurityGroups:
-#         - !Ref EfsLambdaSecurityGroup  
-#   AccessPoint:
-#     Type: AWS::EFS::AccessPoint
-#     Properties:
-#       FileSystemId: !Ref EfsFileSystem
-#       PosixUser:
-#         Gid: "1000"
-#         Uid: "1000"
-#       RootDirectory:
-#         Path: "/ml"
-#         CreationInfo:
-#           OwnerGid: "1000"
-#           OwnerUid: "1000"
-#           Permissions: "755"  
+    EfsFileSystem:
+      Type: 'AWS::EFS::FileSystem'
+
+    MountTargetA:
+      Type: 'AWS::EFS::MountTarget'
+      Properties:
+        FileSystemId: !Ref EfsFileSystem
+        SubnetId: !Ref SubnetAPrivate
+        SecurityGroups:
+          - !Ref EfsLambdaSecurityGroup
+
+    AccessPoint:
+      Type: 'AWS::EFS::AccessPoint'
+      Properties:
+        FileSystemId: !Ref EfsFileSystem
+        PosixUser:
+          Gid: '1000'
+          Uid: '1000'
+        RootDirectory:
+          Path: '/ml'
+          CreationInfo:
+            OwnerGid: '1000'
+            OwnerUid: '1000'
+            Permissions: '755'  
   
   
 # you can overwrite defaults here
@@ -58,15 +67,33 @@ provider:
 functions:
   apps3:
     environment:
-        MODEL_DIR: /mnt/ml/models/
-          
+      MODEL_DIR: /mnt/ml/models/
+      FILE_SYSTEM_ARN: ${fileSystemArn}
     handler: s3-efs/apps3.lambda_handler
-    
     runtime: python3.8   
+    timeout: 300
+    memorySize: 5000
+    vpc:
+      securityGroupIds:
+        - EfsLambdaSecurityGroup
+      subnetIds:
+        - SubnetAPrivate
+    fileSystemConfig:
+      localMountPath: /mnt/ml
+      arn: ${fileSystemArn}
+    Policies:
+      - S3CrudPolicy: 
+          BucketName: bucket-example-mls3
+      - EFSWriteAccessPolicy:
+          FileSystem: EfsFileSystem
+          AccessPoint: AccessPoint
     events:
       - s3:
           bucket: bucket-example-mls3
           event: s3:ObjectCreated:*
+
+custom:
+  fileSystemArn: !Sub "arn:aws:elasticfilesystem:eu-west-3:230410870031:access-point/access-point/${self:resources.Resources.AccessPoint.Properties.AccessPointId}"
 
   appml1:  
     image:
