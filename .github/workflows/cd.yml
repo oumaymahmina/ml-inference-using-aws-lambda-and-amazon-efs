@@ -24,8 +24,7 @@ jobs:
           - name: Install serverless
             run: npm install -g serverless
 
-          - name: Install plugin
-            run:  serverless plugin install -n serverless-vpc-plugin 
+          
  
 
 
