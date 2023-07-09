@@ -24,8 +24,10 @@ jobs:
           - name: Install serverless
             run: npm install -g serverless
 
-          # - name: Install plugin
-          #   run:  serverless plugin install -n serverless-vpc-plugin 
+          - name: Install plugin
+            run: npm install serverless-pseudo-parameters
+ 
+
 
           - name: Deploy to AWS Lambda
             run: sls deploy      
