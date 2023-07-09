@@ -49,8 +49,8 @@ resources:
             # FromPort: 0
             # ToPort: 65535
             IpProtocol: -1
-      EfsFileSystem:
-        Type: 'AWS::EFS::FileSystem'
+    EfsFileSystem:
+      Type: 'AWS::EFS::FileSystem'
 
     MountTargetA:
       Type: 'AWS::EFS::MountTarget'
