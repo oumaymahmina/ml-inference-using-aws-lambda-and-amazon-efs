@@ -68,7 +68,6 @@ functions:
   apps3:
     environment:
       MODEL_DIR: /mnt/ml/models/
-      FILE_SYSTEM_ARN: ${fileSystemArn}
     handler: s3-efs/apps3.lambda_handler
     runtime: python3.8   
     timeout: 300
@@ -80,7 +79,7 @@ functions:
         - SubnetAPrivate
     fileSystemConfig:
       localMountPath: /mnt/ml
-      arn: ${fileSystemArn}
+      arn: { "Fn::GetAtt": [ AccessPoint, Arn ] }
     Policies:
       - S3CrudPolicy: 
           BucketName: bucket-example-mls3
@@ -91,9 +90,6 @@ functions:
       - s3:
           bucket: bucket-example-mls3
           event: s3:ObjectCreated:*
-
-custom:
-  fileSystemArn: !Sub "arn:aws:elasticfilesystem:eu-west-3:230410870031:access-point/access-point/${self:resources.Resources.AccessPoint.Properties.AccessPointId}"
 
   appml1:  
     image:
