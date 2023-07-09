@@ -10,11 +10,6 @@ plugins:
   - serverless-vpc-plugin
   
 provider:
-  vpc:
-    securityGroupIds:
-      -  # plugin will add LambdaExecutionSecurityGroup to this list
-    subnetIds:
-      -  # plugin will add the "Application" subnets to this list
   name: aws
   runtime: python3.8
   ecr:
