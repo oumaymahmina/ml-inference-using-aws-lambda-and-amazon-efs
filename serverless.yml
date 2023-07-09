@@ -17,7 +17,7 @@ provider:
         path: ./ml-inference/
   timeout: 600
   memorySize: 1000
-  region: us-east-1
+  region: eu-west-3
 custom:
   vpcConfig:
     # Whether plugin is enabled. Can be used to selectively disable plugin
@@ -52,9 +52,9 @@ custom:
  
     # Optionally specify AZs (defaults to auto-discover all availabile AZs)
     zones:
-      - us-east-1a
-      - us-east-1b
-      - us-east-1c  
+      - eu-west-3a
+      - eu-west-3b
+      - eu-west-3c  
 resources:
  AWSTemplateFormatVersion: '2010-09-09'
  Transform: AWS::Serverless-2016-10-31
@@ -221,7 +221,7 @@ resources:
       - MountTargetA
     Properties:
       PackageType: Image
-      ImageUri: 772561320311.dkr.ecr.us-east-1.amazonaws.com/serverless-ml-apps-dev:ml-image
+      ImageUri: 230410870031.dkr.ecr.eu-west-3.amazonaws.com/serverless-ml-apps-dev:ml-image
       VpcConfig:
         SecurityGroupIds:
           - !Ref EfsLambdaSecurityGroup
