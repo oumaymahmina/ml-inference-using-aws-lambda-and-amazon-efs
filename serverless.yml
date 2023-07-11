@@ -86,20 +86,20 @@ functions:
     runtime: python3.8   
     timeout: 300
     memorySize: 5000
-    # vpc:
-    #   securityGroupIds:
-    #     - EfsLambdaSecurityGroup
-    #   subnetIds:
-    #     - SubnetAPrivate
-    # fileSystemConfig:
-    #   localMountPath: /mnt/ml
-    #   arn: { "Fn::GetAtt": [ AccessPoint, Arn ] }
-    # Policies:
-    #   - S3CrudPolicy: 
-    #       BucketName: bucket-example-mls3
-    #   - EFSWriteAccessPolicy:
-    #       FileSystem: EfsFileSystem
-    #       AccessPoint: AccessPoint
+    vpc:
+      securityGroupIds:
+        - EfsLambdaSecurityGroup
+      subnetIds:
+        - SubnetAPrivate
+    fileSystemConfig:
+      localMountPath: /mnt/ml
+      arn: { "Fn::GetAtt": [ AccessPoint, Arn ] }
+    Policies:
+      - S3CrudPolicy: 
+          BucketName: bucket-example-mls3
+      - EFSWriteAccessPolicy:
+          FileSystem: EfsFileSystem
+          AccessPoint: AccessPoint
     events:
       - s3:
           bucket: bucket-example-mls3
