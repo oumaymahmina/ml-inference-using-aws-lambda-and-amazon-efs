@@ -66,6 +66,7 @@ resources:
          - Ref: "EfsLambdaSecurityGroup"
 
     AccessPoint:
+      DependsOn: MountTargetA
       Type: 'AWS::EFS::AccessPoint'
       Properties:
         FileSystemId: 
