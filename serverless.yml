@@ -58,7 +58,7 @@ resources:
         SubnetId: 
           Ref: SubnetAPrivate
         SecurityGroups:
-          - !Ref EfsLambdaSecurityGroup
+          Ref: EfsLambdaSecurityGroup
 
     AccessPoint:
       Type: 'AWS::EFS::AccessPoint'
@@ -88,9 +88,9 @@ functions:
     
     vpc:
       securityGroupIds:
-        - EfsLambdaSecurityGroup
+        - Ref: EfsLambdaSecurityGroup
       subnetIds:
-        - SubnetAPrivate
+        - Ref: SubnetAPrivate
     fileSystemConfig:
       localMountPath: /mnt/ml
       arn: { "Fn::GetAtt": [ AccessPoint, Arn ] }
