@@ -53,15 +53,18 @@ resources:
     MountTargetA:
       Type: 'AWS::EFS::MountTarget'
       Properties:
-        FileSystemId: !Ref EfsFileSystem
-        SubnetId: !Ref SubnetAPrivate
+        FileSystemId: 
+          Ref: EfsFileSystem
+        SubnetId: 
+          Ref: SubnetAPrivate
         SecurityGroups:
           - !Ref EfsLambdaSecurityGroup
 
     AccessPoint:
       Type: 'AWS::EFS::AccessPoint'
       Properties:
-        FileSystemId: !Ref EfsFileSystem
+        FileSystemId: 
+          Ref: EfsFileSystem
         PosixUser:
           Gid: '1000'
           Uid: '1000'
