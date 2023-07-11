@@ -63,7 +63,7 @@ resources:
         SubnetId: 
            Ref: SubnetAPrivate
         SecurityGroups:
-         - Ref: ${EfsLambdaSecurityGroup}
+         - Ref: "EfsLambdaSecurityGroup"
 
     AccessPoint:
       Type: 'AWS::EFS::AccessPoint'
