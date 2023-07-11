@@ -1,4 +1,4 @@
-service: ml-apps
+service: ml-apps-test
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -94,12 +94,12 @@ functions:
     fileSystemConfig:
       localMountPath: /mnt/ml
       arn: { "Fn::GetAtt": [ AccessPoint, Arn ] }
-    Policies:
-      - S3CrudPolicy: 
-          BucketName: bucket-example-mls3
-      - EFSWriteAccessPolicy:
-          FileSystem: EfsFileSystem
-          AccessPoint: AccessPoint
+    # Policies:
+    #   - S3CrudPolicy: 
+    #       BucketName: bucket-example-mls3
+    #   - EFSWriteAccessPolicy:
+    #       FileSystem: EfsFileSystem
+    #       AccessPoint: AccessPoint
     events:
       - s3:
           bucket: bucket-example-mls3
