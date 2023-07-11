@@ -29,14 +29,16 @@ resources:
     SubnetAPrivate:
       Type: 'AWS::EC2::Subnet'
       Properties:
-        VpcId: !Ref EfsLambdaVpc
-        AvailabilityZone: !Select [1, !GetAZs '']
+        VpcId: 
+           Ref: EfsLambdaVpc
+        AvailabilityZone: eu-west-3a
         CidrBlock: '10.0.1.0/24'
     EfsLambdaSecurityGroup:
       Type: 'AWS::EC2::SecurityGroup'
       Properties:
         GroupDescription: 'Security group for NAT Gateway Lambda'
-        VpcId: !Ref EfsLambdaVpc
+        VpcId: 
+           Ref: EfsLambdaVpc
         SecurityGroupEgress:
           - CidrIp: "0.0.0.0/0"
             # FromPort: 0
@@ -47,8 +49,11 @@ resources:
             # FromPort: 0
             # ToPort: 65535
             IpProtocol: -1
+
     EfsFileSystem:
       Type: 'AWS::EFS::FileSystem'
+      Properties: 
+          AvailabilityZoneName: eu-west-3a
 
     MountTargetA:
       Type: 'AWS::EFS::MountTarget'
