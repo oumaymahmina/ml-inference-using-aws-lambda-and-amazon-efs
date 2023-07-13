@@ -2,7 +2,7 @@ name: Continuous delivery
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   
     deploy:
