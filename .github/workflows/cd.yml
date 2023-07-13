@@ -1,8 +1,8 @@
-name: Continuous deliveryy
+name: Continuous delivery
 on:
   push:
     branches:
-      - main
+      - master
 jobs:
   
     deploy:

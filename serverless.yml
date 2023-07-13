@@ -25,6 +25,27 @@ resources:
       Type: 'AWS::EC2::VPC'
       Properties:
         CidrBlock: '10.0.0.0/16'
+    InternetGateway:
+      Type: 'AWS::EC2::InternetGateway'
+      Properties:
+        Tags:
+        - Key: Name
+          Value:  '10.0.0.0/16'
+    VPCGatewayAttachment:
+      Type: 'AWS::EC2::VPCGatewayAttachment'
+      Properties:
+        VpcId: 
+           Ref: EfsLambdaVpc
+        InternetGatewayId: 
+           Ref: InternetGateway 
+    SubnetAPublic:
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId: 
+           Ref: EfsLambdaVpc
+        AvailabilityZone: eu-west-3b
+        MapPublicIpOnLaunch: true
+        CidrBlock: "10.0.0.0/24"              
 
     SubnetAPrivate:
       Type: 'AWS::EC2::Subnet'
@@ -33,6 +54,51 @@ resources:
            Ref: EfsLambdaVpc
         AvailabilityZone: eu-west-3a
         CidrBlock: '10.0.1.0/24'
+    RouteTableAPublic:
+      Type: 'AWS::EC2::RouteTable'
+      Properties:
+        VpcId: 
+           Ref: EfsLambdaVpc
+    RouteTableAPrivate:
+      Type: 'AWS::EC2::RouteTable'
+      Properties:
+        VpcId: 
+           Ref: EfsLambdaVpc
+    RouteTableAssociationAPublic:
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
+      Properties:
+        SubnetId: 
+           Ref: SubnetAPublic
+        RouteTableId: 
+           Ref: RouteTableAPublic
+    RouteTableAssociationAPrivate:
+      Type: 'AWS::EC2::SubnetRouteTableAssociation'
+      Properties:
+        SubnetId: 
+           Ref: SubnetAPrivate
+        RouteTableId: 
+           Ref: RouteTableAPrivate
+    RouteTablePublicAInternetRoute:
+      Type: 'AWS::EC2::Route'
+      DependsOn: VPCGatewayAttachment
+      Properties:
+        RouteTableId: 
+           Ref: RouteTableAPublic
+        DestinationCidrBlock: '0.0.0.0/0'
+        GatewayId: 
+           Ref: InternetGateway
+    EIPA:
+      Type: 'AWS::EC2::EIP'
+      Properties:
+        Domain: vpc
+    RouteA:
+      Type: 'AWS::EC2::Route'
+      Properties:
+        RouteTableId: 
+           Ref: RouteTableAPrivate
+        DestinationCidrBlock: '0.0.0.0/0'
+        NatGatewayId: 
+           Ref: NatGatewayA      
     EfsLambdaSecurityGroup:
       Type: 'AWS::EC2::SecurityGroup'
       Properties:
@@ -105,7 +171,7 @@ functions:
     #       BucketName: bucket-example-mls3
     #   - EFSWriteAccessPolicy:
     #       FileSystem: EfsFileSystem
-    #       AccessPoint: AccessPoint
+    #        AccessPoint: AccessPoint
     events:
       - s3:
           bucket: bucket-example-mls3
